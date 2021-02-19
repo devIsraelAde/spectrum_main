@@ -1,0 +1,3 @@
+//include ':app'
+//include ':Android-TTS-STT:app'
+include ':folioreader', ':sample'
