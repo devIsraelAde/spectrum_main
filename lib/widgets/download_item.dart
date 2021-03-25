@@ -12,51 +12,64 @@ class DownloadItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(left: 16.0, right: 8.0),
-      child: InkWell(
-        onTap:  DownloadTaskStatus.from(data.task.status) == DownloadTaskStatus.complete
-            ? () {
-                onItemClick(data.task);
-              }
-            : null,
-        child: Stack(
-          children: <Widget>[
-            Container(
-              width: double.infinity,
-              height: 64.0,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Expanded(
-                    child: Text(
-                      data.name.contains('.epub') ? data.name.substring(0, data.name.lastIndexOf('.')) : data.name,
-                      maxLines: 1,
-                      softWrap: true,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+      margin: EdgeInsets.only(left: 5, right: 5),
+      // color: Colors.yellow,
+      child: Card(
+        elevation: 15,
+        child: Padding(
+          padding: const EdgeInsets.all(3.0),
+          child: InkWell(
+            splashColor: Colors.blue,
+            onTap:  DownloadTaskStatus.from(data.task.status) == DownloadTaskStatus.complete
+                ? () {
+                    onItemClick(data.task);
+                  }
+                : null,
+            child: Stack(
+              children: <Widget>[
+                Container(
+                  width: double.infinity,
+                  height: 64.0,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Expanded(
+                        child: Container(
+                          margin: EdgeInsets.only(left: 8),
+                          child: Text(
+
+                            data.name.contains('.epub') ? data.name.substring(0, data.name.lastIndexOf('.')) : data.name,
+                            maxLines: 1,
+                            softWrap: true,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 8.0),
+                        child: ActionForTaskUI(
+                          task: data.task,
+                          onAtionClick: onAtionClick,
+                        ),
+                      ),
+                    ],
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 8.0),
-                    child: ActionForTaskUI(
-                      task: data.task,
-                      onAtionClick: onAtionClick,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+                DownloadTaskStatus.from(data.task.status) == DownloadTaskStatus.running ||
+                        DownloadTaskStatus.from(data.task.status) == DownloadTaskStatus.paused
+                    ? Positioned(
+                        left: 0.0,
+                        right: 0.0,
+                        bottom: 0.0,
+                        child: LinearProgressIndicator(
+                          value: data.task.progress / 100,
+                        ),
+                      )
+                    : Container()
+              ].where((child) => child != null).toList(),
             ),
-            DownloadTaskStatus.from(data.task.status) == DownloadTaskStatus.running ||
-                    DownloadTaskStatus.from(data.task.status) == DownloadTaskStatus.paused
-                ? Positioned(
-                    left: 0.0,
-                    right: 0.0,
-                    bottom: 0.0,
-                    child: LinearProgressIndicator(
-                      value: data.task.progress / 100,
-                    ),
-                  )
-                : Container()
-          ].where((child) => child != null).toList(),
+          ),
         ),
       ),
     );
@@ -113,7 +126,7 @@ class ActionForTaskUI extends StatelessWidget {
             child: Text(
               'Open',
               // 'Ready',
-              style: TextStyle(color: Colors.green),
+              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
             ),
           ),
           // RawMaterialButton(
@@ -129,14 +142,16 @@ class ActionForTaskUI extends StatelessWidget {
           // )
         ],
       );
-    } else if (DownloadTaskStatus.from(task.status) == DownloadTaskStatus.canceled) {
-      return Text('Canceled', style: TextStyle(color: Colors.red));
-    } else if (DownloadTaskStatus.from(task.status) == DownloadTaskStatus.failed) {
+    }
+    // else if (DownloadTaskStatus.from(task.status) == DownloadTaskStatus.canceled) {
+    //   return Text('Canceled', style: TextStyle(color: Colors.red));
+    // }
+    else if (DownloadTaskStatus.from(task.status) == DownloadTaskStatus.failed) {
       return Row(
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text('Failed', style: TextStyle(color: Colors.red)),
+          Text('Failed', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           RawMaterialButton(
             onPressed: () {
               onAtionClick(task);

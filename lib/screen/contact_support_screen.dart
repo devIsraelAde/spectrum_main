@@ -77,19 +77,23 @@ class ContactSupportScreen extends StatelessWidget {
               ),
             ),
             SizedBox(height: 20.0),
-            InkWell(
-                onTap: () async {
-                  await Clipboard.setData(ClipboardData(text: 'onlinesupport@spectrumbookslimited.com'));
-                  Scaffold.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(SnackBar(
-                        backgroundColor: Constants.primaryColor,
-                        content: Text(
-                          'Support Email Copied',
-                          style: TextStyle(color: Colors.white),
-                        )));
-                },
-                child: Info(Icons.mail, 'onlinesupport@spectrumbookslimited.com')),
+            Flexible(
+              fit: FlexFit.loose,
+              child: InkWell(
+                  onTap: () async {
+                    await Clipboard.setData(ClipboardData(text: 'onlinesupport@spectrumbookslimited.com'));
+                    Scaffold.of(context)
+                      ..hideCurrentSnackBar()
+                      ..showSnackBar(SnackBar(
+                          backgroundColor: Constants.primaryColor,
+                          content: Text(
+                            'Support Email Copied',
+                            style: TextStyle(color: Colors.white),
+                          )));
+                  },
+
+                  child: Info(Icons.mail, 'onlinesupport@spectrumbookslimited.com')),
+            ),
             SizedBox(height: 10.0),
             InkWell(
                 onTap: () async {
@@ -106,7 +110,7 @@ class ContactSupportScreen extends StatelessWidget {
                 child: Info(Icons.call, '+234 816 877 5063')),
             SizedBox(height: 10.0),
             Padding(
-              padding: EdgeInsets.only(left: MediaQuery.of(context).size.width / 9),
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 // mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
@@ -186,7 +190,7 @@ class Info extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Row(
 /*        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,*/

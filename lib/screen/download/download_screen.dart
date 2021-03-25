@@ -53,11 +53,11 @@ class _DownloadScreenState extends State<DownloadScreen> {
                               ?.getsinglebooksfordownload(downloadid: downloads?.elementAt(index)?.taskId);
                           if (bookDetails == null) {
                             return Padding(
-                              padding: const EdgeInsets.all(8.0),
+                              padding: const EdgeInsets.all(0.0),
                               child: Text(
                                 // 'Error in a file',
                                 '',
-                                style: TextStyle(fontSize: 20, color: Colors.red),
+                                style: TextStyle(fontSize: 1, color: Colors.red),
                               ),
                             );
                           } else {

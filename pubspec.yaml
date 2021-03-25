@@ -56,6 +56,7 @@ dependencies:
   salomon_bottom_bar: ^2.0.0
   shared_preferences: ^0.5.12+4
   webview_flutter_plus: ^0.1.1+9
+  data_connection_checker: ^0.3.4
 
 dev_dependencies:
   flutter_test:
@@ -78,7 +79,7 @@ flutter_native_splash:
 flutter_icons:
   android: "logo"
 #  android:  true
-  ios: true
+  ios: truem
   image_path: "assets/images/logo.png"
 
 

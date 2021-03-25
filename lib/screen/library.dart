@@ -36,6 +36,7 @@ class _LibraryState extends State<Library> {
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               mainAxisSpacing: 10.0,
+                              childAspectRatio: 3/4,
                             ),
                             itemBuilder: (context, index) {
                               String accesscode = context.watch<DatabaseHelper>().getuser().access_code;
@@ -98,19 +99,23 @@ class BookCard extends StatelessWidget {
             onTap: onTap,
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
-              child: Stack(
-                children: [
-                  CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    progressIndicatorBuilder: (context, url, downloadProgress) => Center(
-                      child: CircularProgressIndicator(
-                        value: downloadProgress.progress,
-                        valueColor: new AlwaysStoppedAnimation<Color>(Constants.primaryColor),
+              child: Container(
+
+                decoration: BoxDecoration(border: Border.all(),),
+                child: Stack(
+                  children: [
+                    CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      progressIndicatorBuilder: (context, url, downloadProgress) => Center(
+                        child: CircularProgressIndicator(
+                          value: downloadProgress.progress,
+                          valueColor: new AlwaysStoppedAnimation<Color>(Constants.primaryColor),
+                        ),
                       ),
+                      errorWidget: (context, url, error) => Icon(Icons.error),
                     ),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
