@@ -170,6 +170,8 @@ class DownloadProvider extends ChangeNotifier {
   //       ),
   //     );
 
+
+
   void requestDownload({BookDetails bookDetails}) async {
     String taskId = await FlutterDownloader.enqueue(
         url: bookDetails.download_link,

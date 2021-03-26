@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -33,19 +32,27 @@ class _LibraryState extends State<Library> {
                       ? Expanded(
                           child: GridView.builder(
                             itemCount: bookDetails.length ?? 0,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               mainAxisSpacing: 10.0,
-                              childAspectRatio: 3/4,
+                              childAspectRatio: 3 / 4,
                             ),
                             itemBuilder: (context, index) {
-                              String accesscode = context.watch<DatabaseHelper>().getuser().access_code;
-                              String frontcover = bookDetails.elementAt(index).front_cover;
+                              String accesscode = context
+                                  .watch<DatabaseHelper>()
+                                  .getuser()
+                                  .access_code;
+                              String frontcover =
+                                  bookDetails.elementAt(index).front_cover;
                               return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 10.0),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10.0),
                                 child: BookCard(
-                                  imageUrl: '${Constants.domainNameUrl}${frontcover}',
-                                  filename: bookDetails.elementAt(index).book_title,
+                                  imageUrl:
+                                      '${Constants.domainNameUrl}${frontcover}',
+                                  filename:
+                                      bookDetails.elementAt(index).book_title,
                                   onTap: () {
                                     Navigator.push(
                                       context,
@@ -53,7 +60,10 @@ class _LibraryState extends State<Library> {
                                         builder: (context) => BookDetail(
                                           bookDetails: context
                                               .watch<DatabaseHelper>()
-                                              .getsinglebooks(bookid: bookDetails.elementAt(index).book_id),
+                                              .getsinglebooks(
+                                                  bookid: bookDetails
+                                                      .elementAt(index)
+                                                      .book_id),
                                         ),
                                       ),
                                     );
@@ -65,13 +75,15 @@ class _LibraryState extends State<Library> {
                         )
                       : Center(
                           child: CircularProgressIndicator(
-                            valueColor: new AlwaysStoppedAnimation<Color>(Constants.primaryColor),
+                            valueColor: new AlwaysStoppedAnimation<Color>(
+                                Constants.primaryColor),
                           ),
                         );
                 } else {
                   return Center(
                     child: CircularProgressIndicator(
-                      valueColor: new AlwaysStoppedAnimation<Color>(Constants.primaryColor),
+                      valueColor: new AlwaysStoppedAnimation<Color>(
+                          Constants.primaryColor),
                     ),
                   );
                 }
@@ -100,21 +112,29 @@ class BookCard extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
               child: Container(
-
-                decoration: BoxDecoration(border: Border.all(),),
-                child: Stack(
-                  children: [
-                    CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      progressIndicatorBuilder: (context, url, downloadProgress) => Center(
+                width: 160,
+                decoration: BoxDecoration(
+                  border: Border.all(),
+                ),
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) => Container(
+                      height: 100,
+                      width: 100,
+                      child: Center(
                         child: CircularProgressIndicator(
                           value: downloadProgress.progress,
-                          valueColor: new AlwaysStoppedAnimation<Color>(Constants.primaryColor),
+                          valueColor: new AlwaysStoppedAnimation<Color>(
+                              Constants.primaryColor),
+                          semanticsLabel: 'Loading Image...',
                         ),
                       ),
-                      errorWidget: (context, url, error) => Icon(Icons.error),
                     ),
-                  ],
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  ),
                 ),
               ),
             ),

@@ -54,35 +54,35 @@ class HexagonShape extends StatelessWidget {
         ),
         Align(
           alignment: Alignment.topCenter,
-          child: Container(
-            alignment: Alignment.center,
-            // padding: EdgeInsets.all(0.0),
-            margin: EdgeInsets.only(top: 150.0, bottom: 10.0),
-            decoration: BoxDecoration(
-              // color: Colors.white,
-              border: Border.all(color: Color(0xff054D44), width: 2),
-              boxShadow: [Constants.kBoxShadow],
-              borderRadius: BorderRadius.circular(13.0),
-            ),
-            width: 150.0,
-            height: 199.0,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10.0),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl,
-                progressIndicatorBuilder: (context, url, downloadProgress) =>
-                    CircularProgressIndicator(value: downloadProgress.progress),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(10.0),
+            child: Container(
+              // color: Colors.black,
+              alignment: Alignment.center,
+              // padding: EdgeInsets.all(0.0),
+              margin: EdgeInsets.only(top: 150.0, bottom: 10.0),
+              decoration: BoxDecoration(
+                // color: Colors.white,
+                border: Border.all(color: Color(0xff054D44), width: 2),
+                // boxShadow: [Constants.kBoxShadow],
+                borderRadius: BorderRadius.circular(5.0),
               ),
-
-              //  Image(
-              //   image: NetworkImage(
-              //     imageUrl,
-              //   ),
-              //   width: 150.0,
-              //   height: 200.0,
-              //   fit: BoxFit.fill,
-              // ),
+              width: 160.0,
+              // height: 180.0,
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(5.0),
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    progressIndicatorBuilder:
+                        (context, url, downloadProgress) =>
+                            CircularProgressIndicator(
+                                value: downloadProgress.progress),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
