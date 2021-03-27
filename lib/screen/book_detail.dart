@@ -42,14 +42,6 @@ class _BookDetailState extends State<BookDetail> {
     download = false;
   }
 
-  Response response;
-  Dio dio = new Dio();
-
-///////////////////////////////////////
-///////PROGRESS INDICATOR STREAM //////
-///////////////////////////////////////
-  StreamController<int> progressStreamController = new StreamController();
-
   ////////////////////////////////////////////////
   //////////////////INTERNET CHECKER//////////////
   ////////////////////////////////////////////////
@@ -193,7 +185,7 @@ class _BookDetailState extends State<BookDetail> {
                                         print(
                                             'DATA ON, FILE NOT DOWNLOADED YET');
 
-                                        download = false;
+                                        // download = false;
 
                                         return FlatButton(
                                           onPressed: () async {
@@ -211,6 +203,7 @@ class _BookDetailState extends State<BookDetail> {
                                               setState(() {
                                                 download = true;
                                               });
+                                              rebuildAllChildren(context);
                                             } else {
                                               showDialog(
                                                   context: context,
@@ -288,7 +281,7 @@ class _BookDetailState extends State<BookDetail> {
                                         print(
                                             'DATA OFF, FILE NOT DOWNLOADED YET');
 
-                                        download = false;
+                                        // download = false;
 
                                         return FlatButton(
                                           onPressed: () async {
