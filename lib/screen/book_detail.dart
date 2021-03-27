@@ -42,13 +42,17 @@ class _BookDetailState extends State<BookDetail> {
     download = false;
   }
 
-///////////////////////////////////////
-///////PROGRESS INDICATOR /////////////
-///////////////////////////////////////
-  int _total = 0, _received = 0;
-  http.StreamedResponse _response;
-  List<int> _bytes = [];
+  Response response;
+  Dio dio = new Dio();
 
+///////////////////////////////////////
+///////PROGRESS INDICATOR STREAM //////
+///////////////////////////////////////
+  StreamController<int> progressStreamController = new StreamController();
+
+  ////////////////////////////////////////////////
+  //////////////////INTERNET CHECKER//////////////
+  ////////////////////////////////////////////////
   Future checkInternet() async {
     print("The statement 'this machine is connected to the Internet' is: ");
     print(await DataConnectionChecker().hasConnection);
@@ -93,8 +97,8 @@ class _BookDetailState extends State<BookDetail> {
 
   @override
   Widget build(BuildContext context) {
-    rebuildAllChildren(context);
-    checkInternet();
+    // rebuildAllChildren(context);
+    // checkInternet();
     return Scaffold(
       body: ValueListenableBuilder<Box<BookDetails>>(
         valueListenable: Hive.box<BookDetails>('books')
@@ -167,7 +171,7 @@ class _BookDetailState extends State<BookDetail> {
                             print(box.get(widget.bookDetails.book_id).status);
                             print('FILE PATH::: ${filepath}');
                             print(
-                                'DOWNLOAD PROGRESS::: ${box.get(widget.bookDetails.book_id).download_link}');
+                                'DOWNLOAD PROGRESS::: ${box.get(widget.bookDetails.book_id).progress}');
 
                             // RETURN
                             return StatefulBuilder(builder:
@@ -206,8 +210,6 @@ class _BookDetailState extends State<BookDetail> {
                                                         'Downloading...')));
                                               setState(() {
                                                 download = true;
-                                                print(
-                                                    'PROGRESS::: ${filepath.progress}');
                                               });
                                             } else {
                                               showDialog(
@@ -241,9 +243,6 @@ class _BookDetailState extends State<BookDetail> {
                                                       )
                                                     ],
                                                   ));
-                                              setState(() {
-                                                rebuildAllChildren(context);
-                                              });
                                             }
                                           },
                                           child: Container(
@@ -442,32 +441,46 @@ class _BookDetailState extends State<BookDetail> {
                                           ),
                                         );
                                       }
-                                      ///////////////////////////////////////////////////////////////////////////////////////
-                                      // DONT'T DOWNLOAD, IF DOWNLOAD WAS CANCELED OR FAILED AND INTERNET CONNECTION IS OFF//
-                                      ///////////////////////////////////////////////////////////////////////////////////////
-                                      else if (DownloadTaskStatus.from(box
-                                                  .get(widget
-                                                      .bookDetails.book_id)
-                                                  .status) ==
-                                              DownloadTaskStatus.failed ||
-                                          DownloadTaskStatus.from(box
+                                      ///////////////////////////////////////////////////////////////////////////////
+                                      // DOWNLOAD, IF DOWNLOAD WAS CANCELED OR FAILED AND INTERNET CONNECTION IS ON//
+                                      ///////////////////////////////////////////////////////////////////////////////
+                                      else if ((DownloadTaskStatus.from(box
                                                       .get(widget
                                                           .bookDetails.book_id)
                                                       .status) ==
-                                                  DownloadTaskStatus.canceled &&
-                                              snapshot.data ==
-                                                  DataConnectionStatus
-                                                      .disconnected) {
-                                        print(
-                                            'INTERNET CHECK::: ${DataConnectionStatus.disconnected}');
-
+                                                  DownloadTaskStatus.failed ||
+                                              DownloadTaskStatus.from(box
+                                                      .get(widget
+                                                          .bookDetails.book_id)
+                                                      .status) ==
+                                                  DownloadTaskStatus.canceled)
+                                          //              &&
+                                          // snapshot.data ==
+                                          //     DataConnectionStatus.connected
+                                          ) {
                                         download = false;
+                                        print(
+                                            'INTERNET CHECK::: ${DataConnectionStatus.connected}');
 
                                         return FlatButton(
                                           onPressed: () async {
                                             if (snapshot.data ==
                                                 DataConnectionStatus
-                                                    .disconnected) {
+                                                    .connected) {
+                                              _downloadProvider.requestDownload(
+                                                  bookDetails: box.get(widget
+                                                      .bookDetails.book_id));
+                                              Scaffold.of(context)
+                                                ..hideCurrentSnackBar()
+                                                ..showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Downloading...')));
+                                              print(
+                                                  'DOWNLOAD PROGRESS CHECK::: ${box.get(widget.bookDetails.book_id).progress}');
+                                              setState(() {
+                                                download = true;
+                                              });
+                                            } else {
                                               showDialog(
                                                   context: context,
                                                   child: AlertDialog(
@@ -500,19 +513,6 @@ class _BookDetailState extends State<BookDetail> {
                                                     ],
                                                   ));
                                               setState(() {
-                                                rebuildAllChildren(context);
-                                              });
-                                            } else {
-                                              _downloadProvider.requestDownload(
-                                                  bookDetails: box.get(widget
-                                                      .bookDetails.book_id));
-                                              Scaffold.of(context)
-                                                ..hideCurrentSnackBar()
-                                                ..showSnackBar(SnackBar(
-                                                    content: Text(
-                                                        'Downloading...')));
-                                              setState(() {
-                                                download = true;
                                                 rebuildAllChildren(context);
                                               });
                                             }
@@ -562,10 +562,11 @@ class _BookDetailState extends State<BookDetail> {
                                           ),
                                         );
                                       }
-                                      ///////////////////////////////////////////////////////////////////////////////
-                                      // DOWNLOAD, IF DOWNLOAD WAS CANCELED OR FAILED AND INTERNET CONNECTION IS ON//
-                                      ///////////////////////////////////////////////////////////////////////////////
-                                      else if ((DownloadTaskStatus.from(box
+
+                                      ///////////////////////////////////////////////////////////////////////////////////////
+                                      // DONT'T DOWNLOAD, IF DOWNLOAD WAS CANCELED OR FAILED AND INTERNET CONNECTION IS OFF//
+                                      ///////////////////////////////////////////////////////////////////////////////////////
+                                      else if (DownloadTaskStatus.from(box
                                                       .get(widget
                                                           .bookDetails.book_id)
                                                       .status) ==
@@ -574,13 +575,128 @@ class _BookDetailState extends State<BookDetail> {
                                                       .get(widget
                                                           .bookDetails.book_id)
                                                       .status) ==
-                                                  DownloadTaskStatus
-                                                      .canceled) &&
+                                                  DownloadTaskStatus.canceled
+                                          // &&
+                                          // snapshot.data ==
+                                          //     DataConnectionStatus
+                                          //         .disconnected
+
+                                          ) {
+                                        print(
+                                            'INTERNET CHECK::: ${DataConnectionStatus.disconnected}');
+
+                                        download = false;
+
+                                        return FlatButton(
+                                          onPressed: () async {
+                                            if (snapshot.data ==
+                                                DataConnectionStatus
+                                                    .disconnected) {
+                                              showDialog(
+                                                  context: context,
+                                                  child: AlertDialog(
+                                                    title: Text(
+                                                      'No Internet Connection',
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                    content: Text(
+                                                        'Please connect your device to the internet to download.'),
+                                                    backgroundColor:
+                                                        Colors.white,
+                                                    elevation: 10,
+                                                    actions: [
+                                                      Container(
+                                                        child: FlatButton(
+                                                          color:
+                                                              Color(0xff054D44),
+                                                          onPressed: () {
+                                                            Navigator.of(
+                                                                    context)
+                                                                .pop();
+                                                          },
+                                                          child: Text(
+                                                            'Okay',
+                                                          ),
+                                                        ),
+                                                      )
+                                                    ],
+                                                  ));
+                                            } else {
+                                              _downloadProvider.requestDownload(
+                                                  bookDetails: box.get(widget
+                                                      .bookDetails.book_id));
+                                              Scaffold.of(context)
+                                                ..hideCurrentSnackBar()
+                                                ..showSnackBar(SnackBar(
+                                                    content: Text(
+                                                        'Downloading...')));
+
+                                              setState(() {
+                                                download = true;
+                                              });
+                                              print(
+                                                  'CHECKING CLICKED DISCONNECTED STUFF FOR DOWNLOAD!!!!!!!!');
+                                            }
+                                          },
+                                          child: Container(
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  flex: 7,
+                                                  child: Text(
+                                                    download
+                                                        ? "Downloading"
+                                                        : "Retry",
+                                                    style: TextStyle(
+                                                      fontSize: 16.0,
+                                                      color: download &&
+                                                              snapshot.data ==
+                                                                  DataConnectionStatus
+                                                                      .connected
+                                                          ? Colors.white
+                                                          : Colors.deepOrange,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                    textAlign: TextAlign.center,
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: download &&
+                                                          snapshot.data ==
+                                                              DataConnectionStatus
+                                                                  .connected
+                                                      ? Container(
+                                                          width: 10,
+                                                          height: 10,
+                                                          child:
+                                                              CircularProgressIndicator(),
+                                                        )
+                                                      : Icon(
+                                                          Icons.replay,
+                                                          color:
+                                                              Colors.deepOrange,
+                                                        ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      }
+
+                                      ///////////////////////////////////////////////
+                                      /////////DOWNLOAD RUNNING//////////////////////
+                                      ///////////////////////////////////////////////
+                                      else if (DownloadTaskStatus.from(box
+                                                  .get(widget
+                                                      .bookDetails.book_id)
+                                                  .status) ==
+                                              DownloadTaskStatus.running &&
                                           snapshot.data ==
                                               DataConnectionStatus.connected) {
-                                        download = false;
-                                        print(
-                                            'INTERNET CHECK::: ${DataConnectionStatus.connected}');
+                                        print('DOWNLOAD RUNNING!!!!!');
 
                                         return FlatButton(
                                           onPressed: () async {
@@ -630,9 +746,6 @@ class _BookDetailState extends State<BookDetail> {
                                                       )
                                                     ],
                                                   ));
-                                              setState(() {
-                                                rebuildAllChildren(context);
-                                              });
                                             }
                                           },
                                           child: Container(
@@ -641,17 +754,10 @@ class _BookDetailState extends State<BookDetail> {
                                                 Expanded(
                                                   flex: 7,
                                                   child: Text(
-                                                    download
-                                                        ? "Downloading"
-                                                        : "Retry",
+                                                    "Downloading",
                                                     style: TextStyle(
                                                       fontSize: 16.0,
-                                                      color: download &&
-                                                              snapshot.data ==
-                                                                  DataConnectionStatus
-                                                                      .connected
-                                                          ? Colors.white
-                                                          : Colors.deepOrange,
+                                                      color: Colors.white,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
@@ -659,30 +765,26 @@ class _BookDetailState extends State<BookDetail> {
                                                   ),
                                                 ),
                                                 Expanded(
-                                                  child: download &&
-                                                          snapshot.data ==
-                                                              DataConnectionStatus
-                                                                  .connected
-                                                      ? Container(
-                                                          width: 10,
-                                                          height: 10,
-                                                          child:
-                                                              CircularProgressIndicator(),
-                                                        )
-                                                      : Icon(
-                                                          Icons.replay,
-                                                          color:
-                                                              Colors.deepOrange,
-                                                        ),
-                                                )
+                                                    child: Container(
+                                                  width: 10,
+                                                  height: 10,
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                )),
                                               ],
                                             ),
                                           ),
                                         );
-                                      } else if (DownloadTaskStatus.from(box
+                                      }
+                                      ///////////////////////////////////////////////
+                                      /////////DOWNLOAD PAUSED///////////////////////
+                                      ///////////////////////////////////////////////
+                                      else if (DownloadTaskStatus.from(box
                                               .get(widget.bookDetails.book_id)
                                               .status) ==
-                                          DownloadTaskStatus.running) {
+                                          DownloadTaskStatus.paused) {
+                                        print('DOWNLOAD PAUSED!!!!!');
+
                                         return FlatButton(
                                           onPressed: () async {
                                             if (snapshot.data ==
@@ -731,9 +833,6 @@ class _BookDetailState extends State<BookDetail> {
                                                       )
                                                     ],
                                                   ));
-                                              setState(() {
-                                                rebuildAllChildren(context);
-                                              });
                                             }
                                           },
                                           child: Container(
@@ -747,12 +846,7 @@ class _BookDetailState extends State<BookDetail> {
                                                         : "Retry",
                                                     style: TextStyle(
                                                       fontSize: 16.0,
-                                                      color: download &&
-                                                              snapshot.data ==
-                                                                  DataConnectionStatus
-                                                                      .connected
-                                                          ? Colors.white
-                                                          : Colors.deepOrange,
+                                                      color: Colors.white,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                     ),
@@ -760,22 +854,12 @@ class _BookDetailState extends State<BookDetail> {
                                                   ),
                                                 ),
                                                 Expanded(
-                                                  child: download &&
-                                                          snapshot.data ==
-                                                              DataConnectionStatus
-                                                                  .connected
-                                                      ? Container(
-                                                          width: 10,
-                                                          height: 10,
-                                                          child:
-                                                              CircularProgressIndicator(),
-                                                        )
-                                                      : Icon(
-                                                          Icons.replay,
-                                                          color:
-                                                              Colors.deepOrange,
-                                                        ),
-                                                )
+                                                    child: Container(
+                                                  width: 10,
+                                                  height: 10,
+                                                  child:
+                                                      CircularProgressIndicator(),
+                                                ))
                                               ],
                                             ),
                                           ),
